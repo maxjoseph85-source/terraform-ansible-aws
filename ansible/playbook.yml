@@ -1,0 +1,48 @@
+---
+- name: Configure Web Server
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Enable nginx via amazon-linux-extras
+      command: amazon-linux-extras enable nginx1
+      changed_when: false
+
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Deploy custom web page
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Terraform + Ansible Deployment</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; background-color: #232f3e; color: white; }
+              h1 { color: #ff9900; }
+              p { font-size: 18px; }
+            </style>
+          </head>
+          <body>
+            <h1>🚀 Successfully Deployed!</h1>
+            <p>This server was provisioned with <strong>Terraform</strong></p>
+            <p>and configured with <strong>Ansible</strong></p>
+            <p>Hosted on <strong>AWS EC2</strong></p>
+          </body>
+          </html>
+        dest: /usr/share/nginx/html/index.html
+        mode: '0644'
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
